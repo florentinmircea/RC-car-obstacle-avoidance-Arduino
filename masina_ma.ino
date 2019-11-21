@@ -1,26 +1,36 @@
-//pini masina
-byte forward = 22;//11
-byte backward = 30;//10
-byte left = 42;//7
-byte right = 38;//6
-byte turbo = 24;//12
-//atentie la conexiuni placuta masina
-byte light_sensor = A0 ;
-float value=0; 
+#include <NewPing.h>
 
-int ms=0;
-int s=0;
-int m=0;
+//senzor ultrasonic
+#define TRIGGER_PIN 11
+#define ECHO_PIN 12
+#define MAX_DISTANCE 200
+#define COLL_DIST 30
+
+
+//pini masina
+#define forward 22//11
+#define backward 30//10
+#define left 42//7
+#define right 38//6
+#define turbo 24//12
+
+//atentie la conexiuni placuta masina
+
+#define light_sensor A0
+
+
+//declarare variabile
+unsigned int distance = 0, light_val = 0;
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 void setup() {
-  // put your setup code here, to run once:
   pinMode(forward, OUTPUT);
   pinMode(backward, OUTPUT);
   pinMode(right, OUTPUT);
   pinMode(left, OUTPUT);
-  pinMode(turbo,OUTPUT);
-  
-  pinMode(light_sensor,INPUT);
+  pinMode(turbo, OUTPUT);
+
+  pinMode(light_sensor, INPUT);
 
   Serial.begin(9600);
 }
@@ -28,14 +38,46 @@ void setup() {
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //value=analogRead(light_sensor);
-  //Serial.println(value);
-  digitalWrite(turbo,HIGH);
-  //digitalWrite(forward,HIGH);
-  //if(value>=150)
-    //digitalWrite(forward,HIGH);
-  //else
-    //digitalWrite(forward,LOW);
-  
+  delay(50);
+
+  unsigned int distance = sonar.ping_cm();//Serial.print(distance);Serial.println("cm");
+  light_val = analogRead(light_sensor); //Serial.println(light_val);
+
+
+
+  if (light_val >= 150)
+  {
+    if (distance < COLL_DIST)
+      changePath();
+    moveForward();
+  }
+  else
+    stopMove();
+
+}
+
+void moveForward()
+{
+  digitalWrite(forward, HIGH);
+}
+
+void stopMove()
+{
+  digitalWrite(forward,LOW);
+  digitalWrite(left,LOW);
+  digitalWrite(right,LOW);
+}
+
+void rotateRight()
+{
+  digitalWrite(right,HIGH);
+  digitalWrite(forward,HIGH);
+  delay(100);
+  stopMove();
+}
+
+void changePath()
+{
+  stopMove();
+  rotateRight();
 }
